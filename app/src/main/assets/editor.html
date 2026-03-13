@@ -560,6 +560,86 @@
             height: 250px;
             border: none;
         }
+
+        /* Modal styles */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px 16px 0 0;
+            width: 100%;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+            animation: modalSlideUp 0.3s ease;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @keyframes modalSlideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .modal-close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-item {
+            padding: 14px;
+            margin: 8px 0;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid #1976d2;
+        }
+
+        .open-modal-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -912,6 +992,24 @@ class WebViewPullToRefreshManager(
     <p>추가적으로, WebView 내부의 contenteditable 영역에서 편집 중인 경우에도 Pull-to-Refresh가 의도치 않게 동작하지 않도록 주의해야 합니다. 이는 특히 게시글 작성, 댓글 입력 등의 기능에서 중요합니다.</p>
 </div>
 
+<!-- Test 8: Modal overlay -->
+<div class="nested-scroll-section">
+    <div class="section-title">8. 모달 오버레이 <span class="test-badge badge-nested">modal</span></div>
+    <div class="section-desc">모달이 열린 상태에서 스크롤 시 Pull-to-Refresh가 동작하지 않아야 합니다.</div>
+    <button class="open-modal-btn" id="openModalBtn" onclick="openModal()">모달 열기</button>
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal-content" id="modalContent">
+        <div class="modal-header">
+            <h3>댓글 목록</h3>
+            <button class="modal-close-btn" id="modalCloseBtn" onclick="closeModal(event)">X</button>
+        </div>
+        <div id="modalList"></div>
+    </div>
+</div>
+
 <!-- Bottom spacing for fixed submit bar -->
 <div style="height: 80px;"></div>
 
@@ -1118,6 +1216,35 @@ class WebViewPullToRefreshManager(
         // Scroll to bottom initially
         chat.scrollTop = chat.scrollHeight;
     })();
+
+    // === Modal ===
+    (function() {
+        var list = document.getElementById('modalList');
+        for (var i = 1; i <= 30; i++) {
+            var item = document.createElement('div');
+            item.className = 'modal-item';
+            item.textContent = '댓글 #' + i + ' - 모달 내부 스크롤 테스트용 항목입니다. Pull-to-Refresh가 간섭하지 않아야 합니다.';
+            list.appendChild(item);
+        }
+    })();
+
+    function openModal() {
+        document.getElementById('modalBackdrop').classList.add('active');
+        if (window.AndroidBridge && AndroidBridge.onModalStateChanged) {
+            AndroidBridge.onModalStateChanged(true);
+        }
+    }
+
+    function closeModal(event) {
+        // 모달 컨텐츠 내부 클릭은 무시 (backdrop 또는 close 버튼만 닫기)
+        if (event && event.target.id !== 'modalBackdrop' && event.target.id !== 'modalCloseBtn') {
+            return;
+        }
+        document.getElementById('modalBackdrop').classList.remove('active');
+        if (window.AndroidBridge && AndroidBridge.onModalStateChanged) {
+            AndroidBridge.onModalStateChanged(false);
+        }
+    }
 
     // Actions
     function saveDraft() {

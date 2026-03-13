@@ -1,0 +1,117 @@
+appId: com.demo.webviewptr
+---
+# 모달이 열린 상태에서 Pull-to-Refresh가 동작하지 않는지 테스트
+
+# 1. 앱 실행
+- launchApp
+
+# 2. 앱 로딩 대기
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# 3. 초기 상태 스크린샷
+- takeScreenshot: modal_01_initial
+
+# 4. 먼저 Pull-to-Refresh가 정상 동작하는지 확인 (최상단에서)
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+    duration: 800
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    text: ".*Refreshed.*#1.*"
+
+- takeScreenshot: modal_02_first_refresh_works
+
+# 5. 모달 열기 버튼까지 스크롤 다운 (모달 버튼은 하단에 있음)
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- swipe:
+    start: 50%, 70%
+    end: 50%, 20%
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: modal_03_scrolled_to_button
+
+# 6. "모달 열기" 버튼 탭
+- tapOn:
+    text: "모달 열기"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: modal_04_modal_opened
+
+# 7. 모달 내부에서 아래로 스와이프 (Pull-to-Refresh 트리거 시도)
+- swipe:
+    start: 50%, 60%
+    end: 50%, 90%
+    duration: 800
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- takeScreenshot: modal_05_after_swipe_in_modal
+
+# 8. Refresh count가 여전히 #1인지 확인 (모달 상태에서 refresh 안 됨)
+- assertVisible:
+    text: ".*#1.*"
+
+# 9. 모달 내부 스크롤 테스트 - 위로 스와이프
+- swipe:
+    start: 50%, 80%
+    end: 50%, 40%
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: modal_06_modal_scrolled
+
+# 10. 모달 닫기 (X 버튼)
+- tapOn:
+    text: "X"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: modal_07_modal_closed

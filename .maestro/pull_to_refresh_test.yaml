@@ -1,0 +1,56 @@
+appId: com.demo.webviewptr
+---
+# Pull-to-Refresh 동작 테스트
+
+# 1. 앱 실행
+- launchApp
+
+# 2. 앱 로딩 대기
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# 3. 초기 상태 확인 - "Pull down" 텍스트가 보여야 함
+- takeScreenshot: 01_initial_state
+- assertVisible:
+    text: ".*Pull down.*"
+
+# 4. 최상단에서 Pull-to-Refresh 테스트 - 아래로 스와이프
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+    duration: 800
+
+# 5. Refresh 동작 대기
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# 6. Pull-to-Refresh 후 스크린샷
+- takeScreenshot: 02_after_pull_to_refresh
+
+# 7. "Refreshed" 텍스트가 나타나는지 확인 (pull-to-refresh 동작 성공)
+- assertVisible:
+    text: ".*Refreshed.*"
+
+# 8. 스크롤 다운 후 Pull-to-Refresh가 트리거되지 않는지 테스트
+- swipe:
+    start: 50%, 70%
+    end: 50%, 30%
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# 9. 스크롤된 상태에서 다시 아래로 스와이프
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+    duration: 800
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- takeScreenshot: 03_after_scroll_and_swipe
+
+# 10. 여전히 refreshCount가 1인지 확인 (스크롤 상태에서는 refresh 안 됨)
+- assertVisible:
+    text: ".*#1.*"
